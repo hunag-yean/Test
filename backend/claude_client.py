@@ -1,4 +1,5 @@
 import json
+import time
 import anthropic
 from .models import AnalysisResult, ActionItem, QAResult
 
@@ -48,20 +49,30 @@ class ClaudeClient:
         self._model = model
 
     def _stream_and_parse(self, user_content: str) -> dict:
-        buffer = ""
-        with self._client.messages.stream(
-            model=self._model,
-            max_tokens=2048,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_content}],
-        ) as stream:
-            for text in stream.text_stream:
-                buffer += text
-        start = buffer.find("{")
-        end = buffer.rfind("}") + 1
-        if start == -1 or end == 0:
-            raise ValueError(f"No JSON found in Claude response: {buffer[:200]}")
-        return json.loads(buffer[start:end])
+        last_exc: Exception | None = None
+        for attempt in range(3):
+            if attempt > 0:
+                time.sleep(2 ** attempt)
+            try:
+                buffer = ""
+                with self._client.messages.stream(
+                    model=self._model,
+                    max_tokens=2048,
+                    system=SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": user_content}],
+                ) as stream:
+                    for text in stream.text_stream:
+                        buffer += text
+                start = buffer.find("{")
+                end = buffer.rfind("}") + 1
+                if start == -1 or end == 0:
+                    raise ValueError(f"No JSON found in Claude response: {buffer[:200]}")
+                return json.loads(buffer[start:end])
+            except (anthropic.APIConnectionError, anthropic.RateLimitError, anthropic.InternalServerError) as e:
+                last_exc = e
+            except json.JSONDecodeError as e:
+                last_exc = e
+        raise last_exc or RuntimeError("Claude API failed after 3 attempts")
 
     async def analyze_transcript(self, transcript: str) -> AnalysisResult:
         import asyncio
@@ -69,7 +80,7 @@ class ClaudeClient:
         data = await loop.run_in_executor(
             None,
             self._stream_and_parse,
-            ANALYSIS_PROMPT.format(transcript=transcript),
+            ANALYSIS_PROMPT.format(transcript=transcript[:80_000]),
         )
         action_items = [
             ActionItem(

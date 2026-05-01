@@ -23,7 +23,10 @@ transcription_service: TranscriptionService | None = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global transcription_service
-    transcription_service = TranscriptionService(model_size=settings.whisper_model)
+    transcription_service = TranscriptionService(
+        model_size=settings.whisper_model,
+        language=settings.whisper_language,
+    )
     yield
     executor.shutdown(wait=False)
 
@@ -183,7 +186,7 @@ async def websocket_endpoint(ws: WebSocket):
                     continue
                 await manager.send_to(ws, {"type": "qa_thinking"})
                 try:
-                    result = await claude_client.answer_question(store.get_full_text(), question)
+                    result = await claude_client.answer_question(store.get_text_for_claude(), question)
                     await manager.send_to(ws, {"type": "qa_result", **result.model_dump()})
                 except Exception as e:
                     await manager.send_to(ws, {"type": "error", "code": "CLAUDE_API_ERROR", "message": str(e), "recoverable": True})

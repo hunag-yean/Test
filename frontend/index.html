@@ -32,7 +32,10 @@
 
   <main class="grid">
     <section class="panel" id="panel-transcript">
-      <h2>即時逐字稿</h2>
+      <div class="panel-header">
+        <h2>即時逐字稿</h2>
+        <button id="copy-transcript-btn" class="btn btn-icon" title="複製逐字稿">複製</button>
+      </div>
       <div id="transcript" class="scroll-box"></div>
     </section>
 
@@ -45,7 +48,10 @@
     </section>
 
     <section class="panel" id="panel-actions">
-      <h2>行動項目</h2>
+      <div class="panel-header">
+        <h2>行動項目</h2>
+        <button id="export-actions-btn" class="btn btn-icon" title="匯出行動項目">匯出</button>
+      </div>
       <ul id="action-list" class="action-list">
         <li class="placeholder">尚未偵測到行動項目</li>
       </ul>

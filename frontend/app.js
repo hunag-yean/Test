@@ -141,6 +141,7 @@ function onAnalysisUpdate(msg) {
 }
 
 function renderActionItems(items) {
+  _lastActionItems = items;
   elActionList.innerHTML = '';
   if (!items.length) {
     elActionList.innerHTML = '<li class="placeholder">尚無行動項目</li>';
@@ -220,6 +221,35 @@ function submitQuestion() {
   elQaInput.value = '';
   send({ type: 'ask_question', question: q });
 }
+
+// ── Export / Copy ──────────────────────────────────────────
+let _lastActionItems = [];
+
+$('copy-transcript-btn').addEventListener('click', () => {
+  const text = elTranscript.textContent.trim();
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = $('copy-transcript-btn');
+    const orig = btn.textContent;
+    btn.textContent = '已複製！';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
+});
+
+$('export-actions-btn').addEventListener('click', () => {
+  if (!_lastActionItems.length) return;
+  const lines = _lastActionItems.map(a =>
+    `- [${a.owner}] ${a.task}${a.due ? `（截止：${a.due}）` : ''}`
+  );
+  const content = `行動項目\n${new Date().toLocaleString('zh-TW')}\n\n${lines.join('\n')}\n`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `action-items-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
 // ── Mic list ───────────────────────────────────────────────
 async function loadMicList() {

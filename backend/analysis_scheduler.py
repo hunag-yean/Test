@@ -28,8 +28,9 @@ class AnalysisScheduler:
                 continue
             try:
                 await self._broadcast({"type": "status_update", "is_analyzing": True})
-                result = await self._claude.analyze_transcript(self._store.get_full_text())
+                result = await self._claude.analyze_transcript(self._store.get_text_for_claude())
                 self._store.mark_analysis_point()
+                self._store.update_rolling_summary(result.summary)
                 payload = {"type": "analysis_update", **result.model_dump()}
                 await self._broadcast(payload)
             except Exception as e:

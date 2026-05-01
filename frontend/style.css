@@ -144,14 +144,30 @@ main.grid {
   overflow: hidden;
 }
 
-.panel h2 {
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.panel h2, .panel-header h2 {
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
-  margin-bottom: 10px;
-  flex-shrink: 0;
+  margin-bottom: 0;
 }
+
+.btn-icon {
+  background: var(--border);
+  color: var(--text-muted);
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  border-radius: 5px;
+}
+.btn-icon:hover { color: var(--text); }
 
 /* Transcript */
 .scroll-box {

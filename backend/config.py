@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     anthropic_api_key: str
     whisper_model: str = "base"
+    whisper_language: str = "zh"
     audio_device_index: int | None = None
     audio_chunk_seconds: int = 15
     analysis_interval_seconds: int = 30
