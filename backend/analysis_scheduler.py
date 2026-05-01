@@ -22,8 +22,9 @@ class AnalysisScheduler:
     async def run(self) -> None:
         while True:
             await asyncio.sleep(self._interval)
+            from .transcript_store import _count_tokens
             new_text = self._store.get_since_last_analysis()
-            word_count = len(new_text.split())
+            word_count = _count_tokens(new_text)
             if word_count < self._min_words:
                 continue
             try:

@@ -156,7 +156,18 @@ async def websocket_endpoint(ws: WebSocket):
                     device_index=device_index,
                     chunk_seconds=settings.audio_chunk_seconds,
                 )
-                audio_manager.start()
+                try:
+                    audio_manager.start()
+                except Exception as e:
+                    meeting_start = None
+                    audio_manager = None
+                    await manager.send_to(ws, {
+                        "type": "error",
+                        "code": "AUDIO_DEVICE_ERROR",
+                        "message": f"無法開啟麥克風：{e}",
+                        "recoverable": True,
+                    })
+                    continue
                 scheduler = AnalysisScheduler(
                     transcript_store=store,
                     claude_client=claude_client,

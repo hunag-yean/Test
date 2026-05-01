@@ -1,5 +1,13 @@
+import re
 import threading
 from .models import TranscriptSegment
+
+
+def _count_tokens(text: str) -> int:
+    """Count words for Latin text and characters for CJK text."""
+    cjk = len(re.findall(r'[一-鿿㐀-䶿豈-﫿]', text))
+    latin_words = len(re.findall(r'\b[a-zA-Z0-9]+\b', text))
+    return cjk + latin_words
 
 # When total words exceed this threshold, send rolling summary + recent words to Claude.
 _LONG_MEETING_WORD_THRESHOLD = 30_000
@@ -28,7 +36,7 @@ class TranscriptStore:
         """Returns text optimised for Claude: full text for short meetings,
         compressed summary + recent window for long meetings."""
         with self._lock:
-            total_words = sum(len(t.split()) for t in self._full_text)
+            total_words = sum(_count_tokens(t) for t in self._full_text)
             if total_words <= _LONG_MEETING_WORD_THRESHOLD:
                 return " ".join(self._full_text)
             recent_tokens: list[str] = []
@@ -58,7 +66,7 @@ class TranscriptStore:
 
     def word_count(self) -> int:
         with self._lock:
-            return sum(len(t.split()) for t in self._full_text)
+            return sum(_count_tokens(t) for t in self._full_text)
 
     def clear(self) -> None:
         with self._lock:
