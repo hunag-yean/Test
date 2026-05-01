@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>會議即時助理</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1>會議即時助理</h1>
+    </div>
+    <div class="header-center">
+      <span id="status-indicator" class="status-dot idle"></span>
+      <span id="timer">00:00:00</span>
+      <span id="word-count" class="chip">0 詞</span>
+    </div>
+    <div class="header-right">
+      <select id="mic-select" title="選擇麥克風">
+        <option value="">預設麥克風</option>
+      </select>
+      <button id="start-btn" class="btn btn-primary">開始會議</button>
+      <button id="stop-btn" class="btn btn-danger" disabled>停止會議</button>
+    </div>
+  </header>
+
+  <div id="error-banner" class="error-banner hidden">
+    <span id="error-msg"></span>
+    <button onclick="document.getElementById('error-banner').classList.add('hidden')">✕</button>
+  </div>
+
+  <main class="grid">
+    <section class="panel" id="panel-transcript">
+      <h2>即時逐字稿</h2>
+      <div id="transcript" class="scroll-box"></div>
+    </section>
+
+    <section class="panel" id="panel-summary">
+      <h2>摘要 &amp; 重點</h2>
+      <div id="analyzing-indicator" class="analyzing hidden">分析中…</div>
+      <p id="summary-text" class="summary-text">等待會議開始…</p>
+      <ul id="key-points" class="key-points"></ul>
+      <div id="topics" class="topics"></div>
+    </section>
+
+    <section class="panel" id="panel-actions">
+      <h2>行動項目</h2>
+      <ul id="action-list" class="action-list">
+        <li class="placeholder">尚未偵測到行動項目</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="panel-qa">
+      <h2>問答</h2>
+      <div class="qa-input-row">
+        <input id="qa-input" type="text" placeholder="輸入問題…" disabled />
+        <button id="qa-submit" class="btn btn-secondary" disabled>送出</button>
+      </div>
+      <div id="qa-history" class="qa-history"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
