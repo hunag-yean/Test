@@ -23,6 +23,8 @@ transcription_service: TranscriptionService | None = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global transcription_service
+    # Model is loaded lazily on first transcribe() call (avoids blocking startup
+    # and allows the server to start before the model download completes).
     transcription_service = TranscriptionService(
         model_size=settings.whisper_model,
         language=settings.whisper_language,
